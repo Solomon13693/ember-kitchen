@@ -1,26 +1,465 @@
+/* =========================================================
+   📦 IMPORTS & PLUGINS
+   ========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 @import "tailwindcss";
 
+@plugin "@tailwindcss/forms";
+
+@custom-variant dark (&:is(.dark *));
+
+/* =========================================================
+   🎨 CSS VARIABLES — EMBER KITCHEN DESIGN TOKENS
+   ========================================================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* TEXT SIZES */
+  --text-xs: 0.78125rem;
+  --text-sm: 0.84375rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+
+  /* ===== Ember Kitchen Core Colors ===== */
+  --background:   #1C1611;
+  --foreground:   #FFF8F0;
+
+  --charcoal:     #1C1611;
+  --card-dark:    #2A211A;
+  --true-black:   #14100D;
+  --brand-amber:  #F97316;
+  --amber-dark:   #C2410C;
+  --off-white:    #FFF8F0;
+  --success:      #22B07D;
+  --warning:      #F59E0B;
+  --danger:       #EF4444;
+  --blue:         #3B82F6;
+
+  /* ===== Brand ===== */
+  --primary:      #F97316;
+  --secondary:    #2A211A;
+
+  /* ===== Text ===== */
+  --text-white:   #FFF8F0;
+  --text-muted:   #B8AA9C;
+  --text-grey:    #8A7B6C;
+
+  /* ===== Borders ===== */
+  --border-subtle: rgba(255,255,255,0.08);
+  --border-medium: rgba(255,255,255,0.12);
+
+  /* Dashboard / admin safe areas (viewport-fit=cover) */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --dashboard-topbar-h: calc(4rem + var(--safe-top));
+  --dashboard-main-pt: calc(5rem + var(--safe-top));
+  --dashboard-main-pt-lg: calc(6rem + var(--safe-top));
+
+  /* Storefront page rhythm (header is sticky in flow — no double offset) */
+  --page-pt: 1.25rem;
+  --page-pb: 2.5rem;
+  --section-gap: 1.5rem;
+}
+
+/* Marketing/storefront pages */
+.marketing-header {
+  top: max(0px, env(safe-area-inset-top, 0px));
+}
+
+.marketing-hero {
+  padding-top: calc(4rem + var(--safe-top));
+  padding-bottom: 3.5rem;
+}
+
+.marketing-page-top,
+.page-section {
+  padding-top: calc(var(--page-pt) + var(--safe-top));
+  padding-bottom: calc(var(--page-pb) + var(--safe-bottom));
+}
+
+.empty-state {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: calc(2rem + var(--safe-top));
+  padding-bottom: 3rem;
+}
+
+.store-shell {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+}
+
+.store-main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+}
+
+.store-footer {
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.marketing-pb-safe {
+  padding-bottom: calc(var(--page-pb) + var(--safe-bottom));
+}
+
+/* =========================================================
+   🎨 TAILWIND V4 THEME TOKENS
+   ========================================================= */
+
+@theme {
+  /* ===== Brand Colors ===== */
+  --color-primary:      #F97316;
+  --color-primary-dark: #C2410C;
+  --color-secondary:    #2A211A;
+
+  /* ===== Ember Kitchen Palette ===== */
+  --color-charcoal:     #1C1611;
+  --color-card-dark:    #2A211A;
+  --color-true-black:   #14100D;
+  --color-brand-amber:  #F97316;
+  --color-amber-dark:   #C2410C;
+  --color-off-white:    #FFF8F0;
+  --color-success:      #22B07D;
+  --color-warning:      #F59E0B;
+  --color-danger:       #EF4444;
+  --color-blue:         #3B82F6;
+
+  /* ===== Text Colors ===== */
+  --color-text-white:   #FFF8F0;
+  --color-text-muted:   #B8AA9C;
+  --color-text-grey:    #8A7B6C;
+
+  /* ===== Background/Surface ===== */
+  --color-background:   #1C1611;
+  --color-foreground:   #FFF8F0;
+  --color-surface:      #2A211A;
+  --color-surface-2:    #33281F;
+
+  /* ===== Fonts ===== */
+  --font-sans:    "Inter", system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", "Fira Code", monospace;
+
+  /* ===== Text Sizes ===== */
+  --text-xs:   var(--text-xs);
+  --text-sm:   var(--text-sm);
+  --text-base: var(--text-base);
+  --text-lg:   var(--text-lg);
+  --text-xl:   var(--text-xl);
+  --text-2xl:  var(--text-2xl);
+  --text-3xl:  var(--text-3xl);
+  --text-4xl:  var(--text-4xl);
+  --text-5xl:  var(--text-5xl);
+
+  /* ===== Shadows ===== */
+  --shadow-glow:    0 0 30px rgba(249,115,22,0.15);
+  --shadow-card:    0 4px 24px rgba(0,0,0,0.4);
+  --shadow-default: 0 0 8px rgba(0,0,0,0.3);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* =========================================================
+   🏠 BASE STYLES
+   ========================================================= */
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: var(--text-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================================================
+   📐 CONTAINER
+   ========================================================= */
+.container {
+  @apply w-full mx-auto px-6 md:px-12 max-w-screen-sm sm:max-w-3xl md:max-w-5xl lg:max-w-7xl xl:max-w-7xl 2xl:max-w-screen-2xl;
+}
+
+/* =========================================================
+   🎯 TYPOGRAPHY
+   ========================================================= */
+.font-display {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* =========================================================
+   ✨ GLASSMORPHISM
+   ========================================================= */
+
+.glass {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.glass-amber {
+  background: rgba(249,115,22,0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(249,115,22,0.2);
+}
+
+/* =========================================================
+   🌟 GRADIENT UTILITIES
+   ========================================================= */
+
+.gradient-primary {
+  background: linear-gradient(135deg, #F97316 0%, #C2410C 100%);
+}
+
+.gradient-dark {
+  background: linear-gradient(180deg, #1C1611 0%, #14100D 100%);
+}
+
+.gradient-card {
+  background: linear-gradient(145deg, #2A211A 0%, #1C1611 100%);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #F97316 0%, #FDBA74 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-amber {
+  box-shadow: 0 0 30px rgba(249,115,22,0.25), 0 0 60px rgba(249,115,22,0.1);
+}
+
+/* =========================================================
+   📋 FORM CONTROLS
+   ========================================================= */
+
+.form-group {
+  @apply mb-4;
+}
+
+.form-control {
+  @apply block w-full px-4 py-3 text-sm border border-white/10 bg-white/5 text-off-white rounded-xl outline-none transition-all duration-300 placeholder:text-text-grey;
+}
+
+/* Native select dropdowns on Windows use a light OS menu — force readable option colors. */
+select.form-control option,
+select option {
+  color: #14100D;
+  background-color: #ffffff;
+}
+
+.field-select-dropdown [data-slot='content'].field-select-menu {
+  width: var(--field-select-width, 100%) !important;
+  min-width: var(--field-select-width, 100%) !important;
+  max-width: var(--field-select-width, 100%) !important;
+}
+
+.form-control:focus {
+  @apply border-primary/50 ring-2 ring-primary/20;
+}
+
+.form-control.is-invalid {
+  @apply border-danger/50 ring-2 ring-danger/20;
+}
+
+.form-label {
+  @apply block mb-1.5 text-sm text-text-muted font-medium;
+}
+
+textarea.form-control {
+  @apply min-h-[120px] resize-y;
+}
+
+.PhoneInput input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  font-size: 14px !important;
+  background: none !important;
+}
+
+.PhoneInput select {
+  font-size: 13px !important;
+  font-weight: 300 !important;
+}
+
+.PhoneInput .PhoneInputCountrySelectArrow {
+  @apply -mr-2! ml-4!;
+}
+
+.PhoneInput .PhoneInputCountryIconImg {
+  display: block;
+  width: 30px !important;
+  height: 22px !important;
+  max-width: 22px;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  margin-top: -4px;
+}
+
+.PhoneInput input[type="tel"]:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.PhoneInput .PhoneInputCountryIcon {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1C1611;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3A2E22;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #F97316;
+}
+
+/* =========================================================
+   🔘 SELECTION
+   ========================================================= */
+
+::selection {
+  background: rgba(249,115,22,0.3);
+  color: #FFF8F0;
+}
+
+/* =========================================================
+   🎞️ KEYFRAME ANIMATIONS
+   ========================================================= */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(249,115,22,0.2); }
+  50% { box-shadow: 0 0 40px rgba(249,115,22,0.5); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* =========================================================
+   🔧 UTILITIES
+   ========================================================= */
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* =========================================================
+   🧩 COMPONENTS
+   ========================================================= */
+
+@layer components {
+  /* Menu item / food card hover */
+  .food-card {
+    @apply relative overflow-hidden rounded-2xl transition-all duration-300 cursor-pointer;
+    background: rgba(42,33,26,0.8);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .food-card:hover {
+    border-color: rgba(249,115,22,0.3);
+    box-shadow: 0 8px 32px rgba(249,115,22,0.12);
+    transform: translateY(-2px);
+  }
+
+  /* Admin sidebar item */
+  .nav-item {
+    @apply flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-text-muted transition-all duration-200;
+  }
+
+  .nav-item:hover {
+    @apply bg-white/5 text-off-white;
+  }
+
+  .nav-item.active {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .admin-nav-item {
+    @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-text-muted transition-all duration-200;
+  }
+
+  .admin-nav-item:hover {
+    @apply bg-white/5 text-off-white;
+  }
+
+  .admin-nav-item.active {
+    @apply bg-primary/15 font-semibold text-primary;
+  }
+
+  .admin-nav-item.active svg {
+    @apply text-primary;
+  }
+
+  /* Stats card */
+  .stat-card {
+    @apply rounded-2xl p-5 border border-white/5;
+    background: rgba(42,33,26,0.6);
+  }
+
+  /* Category pill */
+  .category-pill {
+    @apply flex flex-col items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer whitespace-nowrap;
+    background: rgba(42,33,26,0.6);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .category-pill:hover,
+  .category-pill.active {
+    background: rgba(249,115,22,0.1);
+    border-color: rgba(249,115,22,0.25);
+  }
 }
