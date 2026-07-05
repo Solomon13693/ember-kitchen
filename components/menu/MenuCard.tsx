@@ -1,9 +1,9 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { PlusIcon } from '@heroicons/react/24/outline'
+import { RemoteImage } from '@/components/ui'
 import { getMenuItemHref } from '@/constants'
 import { useCartStore } from '@/store'
 import { formatCurrency } from '@/utils'
@@ -37,9 +37,9 @@ export default function MenuCard({ item }: { item: MenuItemType }) {
 
   return (
     <Link href={getMenuItemHref(item.id)} className="food-card group block">
-      <div className="relative aspect-square w-full overflow-hidden bg-white/5">
+      <div className="relative aspect-9/7 w-full overflow-hidden bg-white/5">
         {item.image_url ? (
-          <Image
+          <RemoteImage
             src={item.image_url}
             alt={item.name}
             fill
@@ -47,7 +47,7 @@ export default function MenuCard({ item }: { item: MenuItemType }) {
             sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-4xl">🍲</div>
+          <div className="flex h-full w-full items-center justify-center text-4xl bg-white/80"></div>
         )}
         {!item.is_available && (
           <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-1 text-[10px] font-semibold uppercase text-off-white">

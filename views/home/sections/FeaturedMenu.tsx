@@ -11,7 +11,7 @@ export default function FeaturedMenu() {
   const featured = menuItems.slice(0, 8)
 
   return (
-    <section className="pb-10">
+    <section className="py-10">
       <div className="container">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-xl font-bold text-off-white">Popular right now</h2>

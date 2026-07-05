@@ -1,8 +1,9 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getAddonsByMenuItemId } from '@/services/addons'
 import { supabase } from '@/lib'
+import { queryKeys } from '@/lib/query-keys'
 import type { MenuItemPayloadType, MenuItemType } from '@/types'
 
 const MENU_SELECT = '*, categories(id, name, slug), menu_addons(id, name, price, is_available)'
@@ -109,55 +110,39 @@ export async function uploadMenuImage(file: File): Promise<string> {
 // USE MENU ITEM HOOK (single)
 // ================================
 export function useMenuItem(id?: string | null) {
-  const [menuItem, setMenuItem] = useState<MenuItemType | null>(null)
-  const [loading, setLoading] = useState(true)
+  const query = useQuery({
+    queryKey: queryKeys.menuItem(id ?? ''),
+    queryFn: () => getMenuItemById(id!),
+    enabled: !!id,
+  })
 
-  useEffect(() => {
-    if (!id) {
-      setLoading(false)
-      return
-    }
-    let isMounted = true
-    setLoading(true)
-    getMenuItemById(id).then(data => {
-      if (isMounted) {
-        setMenuItem(data)
-        setLoading(false)
-      }
-    })
-    return () => {
-      isMounted = false
-    }
-  }, [id])
-
-  return { menuItem, loading }
+  return {
+    menuItem: query.data ?? null,
+    loading: query.isLoading,
+    error: query.error instanceof Error ? query.error.message : null,
+    refresh: query.refetch,
+  }
 }
 
 // ================================
 // USE MENU ITEMS HOOK
 // ================================
 export function useMenuItems(filter: MenuItemsFilter = {}) {
-  const [menuItems, setMenuItems] = useState<MenuItemType[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
+  const query = useQuery({
+    queryKey: queryKeys.menuItems(filter),
+    queryFn: () => getMenuItems(filter),
+  })
 
-  const refresh = useCallback(async () => {
-    setLoading(true)
-    try {
-      const data = await getMenuItems(filter)
-      setMenuItems(data)
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load menu items')
-    } finally {
-      setLoading(false)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter.categoryId, filter.search])
+  const refresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: queryKeys.menuItems(filter) })
+    return query.refetch()
+  }
 
-  useEffect(() => {
-    refresh()
-  }, [refresh])
-
-  return { menuItems, loading, error, refresh }
+  return {
+    menuItems: query.data ?? [],
+    loading: query.isLoading,
+    error: query.error instanceof Error ? query.error.message : null,
+    refresh,
+  }
 }

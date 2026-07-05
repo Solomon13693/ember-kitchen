@@ -6,12 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:menu": "node scripts/seed-menu.mjs"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.4.0",
     "@supabase/supabase-js": "^2.110.0",
+    "@tanstack/react-query": "^5.101.2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.42.2",
     "libphonenumber-js": "^1.13.8",

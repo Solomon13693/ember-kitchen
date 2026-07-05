@@ -16,7 +16,7 @@ export default function ToastContainer() {
   const dismiss = useToastStore(state => state.dismiss)
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-4 z-[100] flex flex-col items-center gap-2 px-4 sm:items-end sm:right-4 sm:left-auto">
+    <div className="pointer-events-none fixed inset-x-0 top-4 z-[100] flex flex-col items-center gap-2 px-4 sm:inset-x-auto sm:right-4 sm:items-stretch">
       <AnimatePresence>
         {toasts.map(toast => (
           <motion.div
@@ -25,7 +25,7 @@ export default function ToastContainer() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             className={cn(
-              'pointer-events-auto w-full max-w-md rounded-xl border p-4 shadow-lg backdrop-blur',
+              'pointer-events-auto w-full min-w-[min(100%,20rem)] max-w-md rounded-xl border p-4 shadow-lg backdrop-blur sm:w-96',
               COLOR_CLASSES[toast.color],
             )}
           >

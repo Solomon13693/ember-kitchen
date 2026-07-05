@@ -1,7 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib'
+import { queryKeys } from '@/lib/query-keys'
 import type { CategoryPayloadType, CategoryType } from '@/types'
 
 // ================================
@@ -63,26 +64,21 @@ export async function uploadCategoryImage(file: File): Promise<string> {
 // USE CATEGORIES HOOK
 // ================================
 export function useCategories() {
-  const [categories, setCategories] = useState<CategoryType[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
+  const query = useQuery({
+    queryKey: queryKeys.categories,
+    queryFn: getCategories,
+  })
 
-  const refresh = useCallback(async () => {
-    setLoading(true)
-    try {
-      const data = await getCategories()
-      setCategories(data)
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load categories')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const refresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: queryKeys.categories })
+    return query.refetch()
+  }
 
-  useEffect(() => {
-    refresh()
-  }, [refresh])
-
-  return { categories, loading, error, refresh }
+  return {
+    categories: query.data ?? [],
+    loading: query.isLoading,
+    error: query.error instanceof Error ? query.error.message : null,
+    refresh,
+  }
 }

@@ -2,14 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import Image from 'next/image'
 import { MinusIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { getMenuItemById } from '@/services'
 import { useCartStore } from '@/store'
 import { useToast } from '@/hooks'
 import { formatCurrency } from '@/utils'
 import { ROUTES } from '@/constants'
-import { Skeleton, SkeletonLine } from '@/components/ui'
+import { RemoteImage, Skeleton, SkeletonLine } from '@/components/ui'
 import { cn } from '@/lib'
 import type { CartAddonType, MenuItemType } from '@/types'
 
@@ -140,7 +139,7 @@ const MenuDetailView = () => {
       <div className="grid items-start gap-8 md:grid-cols-2">
         <div className="relative aspect-square w-full overflow-hidden rounded-3xl bg-white/5 md:sticky md:top-20 md:self-start">
           {item.image_url ? (
-            <Image src={item.image_url} alt={item.name} fill className="object-cover" sizes="(min-width: 768px) 50vw, 100vw" />
+            <RemoteImage src={item.image_url} alt={item.name} fill className="object-cover" sizes="(min-width: 768px) 50vw, 100vw" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-6xl">🍲</div>
           )}

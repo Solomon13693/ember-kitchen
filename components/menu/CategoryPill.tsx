@@ -12,7 +12,7 @@ export default function CategoryPill({
   onClick: () => void
 }) {
   return (
-    <button type="button" onClick={onClick} className={cn('category-pill text-[10px] font-medium', isActive ? 'text-primary' : 'text-text-muted')}>
+    <button type="button" onClick={onClick} className={cn('category-pill text-[12px] font-medium', isActive ? 'text-primary' : 'text-text-muted')}>
       {label}
     </button>
   )

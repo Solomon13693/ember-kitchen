@@ -6,7 +6,7 @@ const HomeView = () => {
   return (
     <>
       <Hero />
-      <CategoryStrip />
+      {/* <CategoryStrip /> */}
       <FeaturedMenu />
     </>
   )

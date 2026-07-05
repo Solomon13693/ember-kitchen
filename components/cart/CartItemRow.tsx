@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { MinusIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { RemoteImage } from '@/components/ui'
 import { useCartStore } from '@/store'
 import { cartLineTotal } from '@/types'
 import { formatCurrency, getMenuItemEditHref } from '@/utils'
@@ -20,7 +20,7 @@ export default function CartItemRow({ item }: { item: CartItemType }) {
     <div className="flex items-start gap-4 rounded-2xl border border-white/6 bg-card-dark/60 p-3">
       <Link href={detailHref} className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-white/5">
         {item.image_url ? (
-          <Image src={item.image_url} alt={item.name} fill className="object-cover" sizes="64px" />
+          <RemoteImage src={item.image_url} alt={item.name} fill className="object-cover" sizes="64px" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-xl">🍲</div>
         )}
