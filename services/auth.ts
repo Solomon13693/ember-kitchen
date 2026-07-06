@@ -57,6 +57,34 @@ export async function loginWithPassword(payload: LoginPayloadType) {
   return data
 }
 
+export async function loginCustomer(payload: LoginPayloadType) {
+  const data = await loginWithPassword(payload)
+  const userId = data.user?.id
+  if (!userId) throw new Error('Sign in failed. Please try again.')
+
+  const profile = await getProfile(userId)
+  if (profile?.role === 'admin') {
+    await logoutUser()
+    throw new Error('This account is for staff. Use the admin sign-in page.')
+  }
+
+  return data
+}
+
+export async function loginAdmin(payload: LoginPayloadType) {
+  const data = await loginWithPassword(payload)
+  const userId = data.user?.id
+  if (!userId) throw new Error('Sign in failed. Please try again.')
+
+  const profile = await getProfile(userId)
+  if (profile?.role !== 'admin') {
+    await logoutUser()
+    throw new Error('Administrator access only. Use customer sign-in to order.')
+  }
+
+  return data
+}
+
 // ================================
 // LOGOUT
 // ================================

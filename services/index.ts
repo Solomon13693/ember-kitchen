@@ -1,6 +1,8 @@
 export {
   registerCustomer,
   loginWithPassword,
+  loginCustomer,
+  loginAdmin,
   logoutUser,
   getProfile,
   useAuth,

@@ -43,18 +43,19 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const router = useRouter()
   const pathname = usePathname()
   const { profile, isAuthenticated, isAdmin, loading } = useAuth()
-  const { signOut } = useLogout(ROUTES.login)
+  const { signOut } = useLogout(ROUTES.adminLogin)
 
   useEffect(() => {
     if (loading) return
     if (!isAuthenticated) {
-      router.replace(ROUTES.login)
+      const redirect = encodeURIComponent(pathname)
+      router.replace(`${ROUTES.adminLogin}?redirect=${redirect}`)
       return
     }
     if (!isAdmin) {
       router.replace(ROUTES.home)
     }
-  }, [loading, isAuthenticated, isAdmin, router])
+  }, [loading, isAuthenticated, isAdmin, router, pathname])
 
   if (loading || !isAdmin) {
     return (
