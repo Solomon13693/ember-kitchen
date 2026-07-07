@@ -1,6 +1,6 @@
-import Image from 'next/image'
 import { cn } from '@/lib'
 import { BRAND } from '@/constants'
+import LogoMark from './LogoMark'
 
 type LogoProps = {
   className?: string
@@ -9,9 +9,9 @@ type LogoProps = {
 }
 
 const sizeMap = {
-  sm: { icon: 46, text: 'text-base' },
-  md: { icon: 50, text: 'text-base' },
-  lg: { icon: 60, text: 'text-base' },
+  sm: { icon: 40, text: 'text-sm' },
+  md: { icon: 48, text: 'text-base' },
+  lg: { icon: 56, text: 'text-lg' },
 } as const
 
 export default function Logo({ className, showWordmark = true, size = 'md' }: LogoProps) {
@@ -19,17 +19,11 @@ export default function Logo({ className, showWordmark = true, size = 'md' }: Lo
 
   return (
     <span className={cn('inline-flex items-center gap-3', className)}>
-      <Image
-        src="/logo.png"
-        alt={`${BRAND.name} logo`}
-        width={icon}
-        height={icon}
-        className="shrink-0 rounded-xl"
-        priority
-      />
+      <LogoMark size={icon} />
       {showWordmark && (
         <span className={cn('font-display font-bold tracking-tight text-off-white', text)}>
-          {BRAND.name}
+          <span className="text-success">Sweet</span>{' '}
+          <span className="text-primary">Wealth</span>
         </span>
       )}
     </span>

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { ROUTES } from '@/constants'
+import { ROUTES, BRAND } from '@/constants'
 import { loginAdmin } from '@/services'
 import { useToast } from '@/hooks'
 import { getErrorMessage } from '@/utils'
@@ -47,7 +47,7 @@ const AdminLoginView = () => {
   return (
     <div className="mx-auto w-full max-w-sm px-4">
       <h1 className="text-center font-display text-2xl font-bold text-off-white">Admin sign in</h1>
-      <p className="mt-1 text-center text-sm text-text-muted">Staff access to manage Ember Kitchen.</p>
+      <p className="mt-1 text-center text-sm text-text-muted">Staff access to manage {BRAND.name}.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-8">
         <Input label="Email" type="email" fullWidth {...register('email')} error={errors.email?.message} />

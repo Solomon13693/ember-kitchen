@@ -9,10 +9,6 @@ export const metadata: Metadata = {
     default: `${BRAND.name} — Order Delicious Food Online`,
   },
   description: BRAND.description,
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-  },
 };
 
 export default function RootLayout({

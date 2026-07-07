@@ -10,7 +10,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /* =========================================================
-   🎨 CSS VARIABLES — EMBER KITCHEN DESIGN TOKENS
+   🎨 CSS VARIABLES — SWEET WEALTH DESIGN TOKENS
    ========================================================= */
 
 :root {
@@ -25,7 +25,7 @@
   --text-4xl: 2.25rem;
   --text-5xl: 3rem;
 
-  /* ===== Ember Kitchen Core Colors ===== */
+  /* ===== Sweet Wealth Core Colors ===== */
   --background:   #1C1611;
   --foreground:   #FFF8F0;
 
@@ -125,7 +125,7 @@
   --color-primary-dark: #C2410C;
   --color-secondary:    #2A211A;
 
-  /* ===== Ember Kitchen Palette ===== */
+  /* ===== Sweet Wealth Palette ===== */
   --color-charcoal:     #1C1611;
   --color-card-dark:    #2A211A;
   --color-true-black:   #14100D;
