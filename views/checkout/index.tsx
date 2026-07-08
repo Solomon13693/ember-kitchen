@@ -53,6 +53,7 @@ const CheckoutView = () => {
   const clearCart = useCartStore(state => state.clearCart)
   const { showSuccess, showError } = useToast()
   const [submitting, setSubmitting] = useState(false)
+  const [verifying, setVerifying] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>('paystack')
   const subtotal = cartSubtotal(items)
 
@@ -126,11 +127,13 @@ const CheckoutView = () => {
         access_code: params.accessCode,
         reference: params.reference,
         onSuccess: async transaction => {
+          setVerifying(true)
           try {
             await verifyPaystackPayment(transaction.reference, params.orderId)
             completeCheckout(params.orderId, params.orderNumber, 'Payment successful!')
             resolve()
           } catch (error) {
+            setVerifying(false)
             reject(error)
           }
         },
@@ -180,7 +183,23 @@ const CheckoutView = () => {
   }
 
   return (
-    <div className="container page-section">
+    <>
+      {verifying && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/10 bg-card-dark px-8 py-7 text-center shadow-xl">
+            <svg className="size-10 animate-spin text-primary" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <div>
+              <p className="font-display text-lg font-bold text-off-white">Verifying payment</p>
+              <p className="mt-1 text-sm text-text-muted">Please wait while we confirm your payment…</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="container page-section">
       <h1 className="font-display text-3xl font-bold text-off-white">Checkout</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-5 grid gap-6 lg:grid-cols-3">
@@ -274,7 +293,8 @@ const CheckoutView = () => {
           </Button>
         </div>
       </form>
-    </div>
+      </div>
+    </>
   )
 }
 
