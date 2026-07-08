@@ -7,16 +7,17 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { useCartStore, cartSubtotal } from '@/store'
 import { cartLineTotal } from '@/types'
+import type { OrderFulfillmentType, PaymentMethodType } from '@/types'
 import { useAuth } from '@/services'
-import { placeOrder } from '@/services'
 import { useToast } from '@/hooks'
 import { formatCurrency } from '@/utils'
 import { getOrderDetailHref, ROUTES } from '@/constants'
 import { cn } from '@/lib'
+import { createCodOrder, initializePaystackOrder, verifyPaystackPayment } from '@/lib/api-client'
 import { EmptyState, Input, TextArea } from '@/components/ui'
 import Button from '@/components/ui/button'
 import { OrderItemAddonsList } from '@/components/order'
-import type { OrderFulfillmentType } from '@/types'
+import { CreditCardIcon, BanknotesIcon } from '@heroicons/react/24/outline'
 
 type CheckoutFormValues = {
   type: OrderFulfillmentType
@@ -35,6 +36,16 @@ const schema = yup.object({
   notes: yup.string(),
 })
 
+const PAYMENT_OPTIONS: Array<{
+  key: PaymentMethodType
+  label: string
+  hint: string
+  icon: typeof CreditCardIcon
+}> = [
+  { key: 'paystack', label: 'Card', hint: 'Debit or credit card via Paystack', icon: CreditCardIcon },
+  { key: 'cod', label: 'Cash on Delivery', hint: 'Pay when your order arrives', icon: BanknotesIcon },
+]
+
 const CheckoutView = () => {
   const router = useRouter()
   const { user, isAuthenticated, loading: authLoading } = useAuth()
@@ -42,6 +53,7 @@ const CheckoutView = () => {
   const clearCart = useCartStore(state => state.clearCart)
   const { showSuccess, showError } = useToast()
   const [submitting, setSubmitting] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>('paystack')
   const subtotal = cartSubtotal(items)
 
   const {
@@ -75,30 +87,93 @@ const CheckoutView = () => {
     )
   }
 
+  const buildOrderPayload = (values: CheckoutFormValues) => ({
+    type: values.type,
+    address: values.type === 'delivery' ? values.address : undefined,
+    phone: values.phone,
+    notes: values.notes,
+    items: items.map(item => ({
+      menu_item_id: item.menu_item_id,
+      quantity: item.quantity,
+      price: item.price,
+      addons: item.addons,
+    })),
+  })
+
+  const completeCheckout = (orderId: string, orderNumber: string, message: string) => {
+    clearCart()
+    showSuccess(message, `Order ${orderNumber} has been received.`)
+    router.push(getOrderDetailHref(orderId))
+  }
+
+  const openPaystackPopup = async (
+    params: { accessCode: string; reference: string; orderId: string; orderNumber: string },
+    email: string,
+  ) => {
+    const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+    if (!publicKey) {
+      throw new Error('Paystack is not configured (missing public key)')
+    }
+
+    const PaystackPop = (await import('@paystack/inline-js')).default
+    const popup = new PaystackPop()
+
+    return new Promise<void>((resolve, reject) => {
+      popup.newTransaction({
+        key: publicKey,
+        email,
+        amount: Math.round(subtotal * 100),
+        access_code: params.accessCode,
+        reference: params.reference,
+        onSuccess: async transaction => {
+          try {
+            await verifyPaystackPayment(transaction.reference, params.orderId)
+            completeCheckout(params.orderId, params.orderNumber, 'Payment successful!')
+            resolve()
+          } catch (error) {
+            reject(error)
+          }
+        },
+        onCancel: () => {
+          showError('Payment cancelled', 'Your cart is unchanged. You can try again when ready.')
+          resolve()
+        },
+      })
+    })
+  }
+
   const onSubmit = async (values: CheckoutFormValues) => {
     if (!user) return
     setSubmitting(true)
     try {
-      const order = await placeOrder(
+      const payload = buildOrderPayload(values)
+
+      if (paymentMethod === 'cod') {
+        const order = await createCodOrder(payload)
+        completeCheckout(order.id, order.order_number, 'Order placed!')
+        return
+      }
+
+      if (!user.email) {
+        throw new Error('Your account needs an email address for Paystack payments')
+      }
+
+      const init = await initializePaystackOrder(payload)
+      setSubmitting(false)
+      await openPaystackPopup(
         {
-          type: values.type,
-          address: values.type === 'delivery' ? values.address : undefined,
-          phone: values.phone,
-          notes: values.notes,
-          items: items.map(item => ({
-            menu_item_id: item.menu_item_id,
-            quantity: item.quantity,
-            price: item.price,
-            addons: item.addons,
-          })),
+          accessCode: init.accessCode,
+          reference: init.reference,
+          orderId: init.orderId,
+          orderNumber: init.orderNumber,
         },
-        user.id,
+        user.email,
       )
-      clearCart()
-      showSuccess('Order placed!', `Order ${order.order_number} has been received.`)
-      router.push(getOrderDetailHref(order.id))
     } catch (error) {
-      showError('Could not place order', error instanceof Error ? error.message : 'Please try again.')
+      showError(
+        paymentMethod === 'cod' ? 'Could not place order' : 'Payment failed',
+        error instanceof Error ? error.message : 'Please try again.',
+      )
     } finally {
       setSubmitting(false)
     }
@@ -137,10 +212,6 @@ const CheckoutView = () => {
 
           <Input label="Phone Number" {...register('phone')} error={errors.phone?.message} placeholder="080..." />
           <TextArea label="Notes (optional)" {...register('notes')} placeholder="Extra spicy, no onions, etc." />
-
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-text-muted">
-            Payment method: <span className="font-semibold text-off-white">Cash on Delivery</span>
-          </div>
         </div>
 
         <div className="h-fit space-y-4 rounded-2xl border border-white/6 bg-card-dark/60 p-5">
@@ -162,8 +233,44 @@ const CheckoutView = () => {
             <span>Total</span>
             <span className="text-primary">{formatCurrency(subtotal)}</span>
           </div>
+
+          <div className="border-t border-white/10 pt-4">
+            <p className="mb-3 text-sm font-semibold text-off-white">Payment method</p>
+            <div className="space-y-2">
+              {PAYMENT_OPTIONS.map(option => {
+                const Icon = option.icon
+                return (
+                  <button
+                    key={option.key}
+                    type="button"
+                    onClick={() => setPaymentMethod(option.key)}
+                    className={cn(
+                      'flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors',
+                      paymentMethod === option.key
+                        ? 'border-primary/40 bg-primary/10'
+                        : 'border-white/10 hover:bg-white/5',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'flex size-9 shrink-0 items-center justify-center rounded-lg',
+                        paymentMethod === option.key ? 'bg-primary/20 text-primary' : 'bg-white/5 text-text-muted',
+                      )}
+                    >
+                      <Icon className="size-5" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-off-white">{option.label}</span>
+                      <span className="mt-0.5 block text-xs text-text-muted">{option.hint}</span>
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
           <Button type="submit" loading={submitting} fullWidth>
-            Place Order
+            {paymentMethod === 'cod' ? 'Place Order' : 'Pay with Card'}
           </Button>
         </div>
       </form>

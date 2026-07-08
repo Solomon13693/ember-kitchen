@@ -6,8 +6,9 @@ import { useState } from 'react'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { useOrderTracking, updateOrderStatus } from '@/services'
 import { useToast } from '@/hooks'
-import { ROUTES, ORDER_STATUS_LABEL, getAdminCustomerDetailHref } from '@/constants'
+import { ROUTES, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, PAYMENT_STATUS_BADGE_CLASS, PAYMENT_STATUS_LABEL, getAdminCustomerDetailHref } from '@/constants'
 import { formatCurrency } from '@/utils'
+import { cn } from '@/lib'
 import { OrderStatusBadge, OrderTimeline, OrderItemAddonsList } from '@/components/order'
 import { Skeleton, SkeletonLine } from '@/components/ui'
 import type { OrderStatusType } from '@/types'
@@ -73,7 +74,7 @@ export default function AdminOrderDetailView() {
         <OrderStatusBadge status={order.status} />
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <div className="rounded-2xl border border-white/6 bg-card-dark/60 p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-text-grey">Status</p>
           <div className="mt-2">
@@ -106,6 +107,28 @@ export default function AdminOrderDetailView() {
           <p className="text-xs font-semibold uppercase tracking-wide text-text-grey">Phone</p>
           <p className="mt-2 text-sm font-semibold text-off-white">{order.phone}</p>
         </div>
+
+        {order.payment_method && (
+          <div className="rounded-2xl border border-white/6 bg-card-dark/60 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-text-grey">Payment</p>
+            <p className="mt-2 text-sm font-semibold text-off-white">
+              {PAYMENT_METHOD_LABEL[order.payment_method]}
+            </p>
+            {order.payment_status && (
+              <span
+                className={cn(
+                  'mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold',
+                  PAYMENT_STATUS_BADGE_CLASS[order.payment_status],
+                )}
+              >
+                {PAYMENT_STATUS_LABEL[order.payment_status]}
+              </span>
+            )}
+            {order.payment_reference && (
+              <p className="mt-2 break-all text-xs text-text-grey">Ref: {order.payment_reference}</p>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">

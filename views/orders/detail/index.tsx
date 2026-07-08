@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { useOrderTracking } from '@/services'
 import { formatCurrency, getMenuItemHrefWithAddons } from '@/utils'
 import { ROUTES } from '@/constants'
+import { PAYMENT_METHOD_LABEL, PAYMENT_STATUS_BADGE_CLASS, PAYMENT_STATUS_LABEL } from '@/constants'
+import { cn } from '@/lib'
 import { OrderTimeline, OrderStatusBadge, OrderItemAddonsList } from '@/components/order'
 import { SkeletonLine, Skeleton } from '@/components/ui'
 
@@ -109,6 +111,30 @@ const OrderDetailView = () => {
             {order.notes && (
               <p className="mt-1">
                 <span className="font-semibold text-off-white">Notes:</span> {order.notes}
+              </p>
+            )}
+            {order.payment_method && (
+              <p className="mt-1">
+                <span className="font-semibold text-off-white">Payment:</span>{' '}
+                {PAYMENT_METHOD_LABEL[order.payment_method]}
+              </p>
+            )}
+            {order.payment_status && (
+              <p className="mt-1 flex flex-wrap items-center gap-2">
+                <span className="font-semibold text-off-white">Payment status:</span>
+                <span
+                  className={cn(
+                    'rounded-full px-2.5 py-0.5 text-xs font-semibold',
+                    PAYMENT_STATUS_BADGE_CLASS[order.payment_status],
+                  )}
+                >
+                  {PAYMENT_STATUS_LABEL[order.payment_status]}
+                </span>
+              </p>
+            )}
+            {order.payment_reference && (
+              <p className="mt-1 break-all">
+                <span className="font-semibold text-off-white">Reference:</span> {order.payment_reference}
               </p>
             )}
           </div>

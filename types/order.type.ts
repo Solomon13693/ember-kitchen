@@ -6,6 +6,10 @@ export type OrderStatusType = 'pending' | 'confirmed' | 'preparing' | 'ready' | 
 
 export type OrderFulfillmentType = 'delivery' | 'pickup'
 
+export type PaymentMethodType = 'cod' | 'paystack'
+
+export type PaymentStatusType = 'not_required' | 'pending' | 'paid' | 'failed'
+
 export const ORDER_STATUS_FLOW: OrderStatusType[] = [
   'pending',
   'confirmed',
@@ -39,6 +43,9 @@ export type OrderType = {
   address: string | null
   phone: string
   notes: string | null
+  payment_method?: PaymentMethodType | null
+  payment_status?: PaymentStatusType
+  payment_reference?: string | null
   created_at: string
   updated_at: string
   order_items?: OrderItemType[]
